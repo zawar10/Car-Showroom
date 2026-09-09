@@ -40,7 +40,8 @@ const usersSlice = createSlice({
       })
       .addCase(createUser.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload?.data) state.items.unshift(action.payload.data);
+        const user = action.payload?.data ?? action.payload;
+        if (user?.id) state.items.unshift(user);
         state.success = true;
       })
       .addCase(createUser.rejected, (state, action) => {

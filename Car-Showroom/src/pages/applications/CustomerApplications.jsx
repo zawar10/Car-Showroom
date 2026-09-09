@@ -1,0 +1,12 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { PageHeader, Status, EmptyState } from '../../components/common/Ui';
+import { getApplicationsApi } from '../../services/workflowApi';
+import { formatCurrencyPKR, formatDate } from '../../utils/formatters';
+
+export default function CustomerApplications() {
+  const [applications, setApplications] = useState([]);
+  const [error, setError] = useState('');
+  useEffect(() => { getApplicationsApi().then(setApplications).catch((requestError) => setError(requestError.response?.data?.message || 'Unable to load applications.')); }, []);
+  return <><PageHeader title="My applications" text="Track your application, approval, finance, and payment progress." />{error && <div className="error" role="alert">{error}</div>}{!error && !applications.length ? <section className="panel"><EmptyState text="You have not submitted an application yet." /></section> : <section className="application-list">{applications.map((application) => <article className="panel application" key={application.id}><div><small>{application.applicationNumber} · {formatDate(application.createdAt)}</small><h3>{application.vehicle?.make} {application.vehicle?.model}</h3><p>{application.vehicle?.variant} · {formatCurrencyPKR(application.vehicle?.sellingPrice)}</p><p>Manager: {application.manager?.name || 'Pending assignment'}</p><Link to={`/showroom/${application.vehicle?.legacyId || application.vehicle?.id}`}>View vehicle</Link>{application.financePlan && <div className="specs"><span>Down payment<b>{formatCurrencyPKR(application.financePlan.downPayment)}</b></span><span>Financed<b>{formatCurrencyPKR(application.financePlan.financedAmount)}</b></span><span>Installment<b>{formatCurrencyPKR(application.financePlan.installmentAmount)}</b></span><span>Total paid<b>{formatCurrencyPKR((application.payments || []).reduce((sum, payment) => sum + Number(payment.amount), 0))}</b></span></div>}{application.financePlan?.installments?.length > 0 && <table><thead><tr><th>#</th><th>Due</th><th>Amount</th><th>Paid</th><th>Status</th></tr></thead><tbody>{application.financePlan.installments.map(installment => <tr key={installment.id}><td>{installment.number}</td><td>{formatDate(installment.dueDate)}</td><td>{formatCurrencyPKR(installment.amount)}</td><td>{formatCurrencyPKR(installment.paidAmount)}</td><td>{installment.status}</td></tr>)}</tbody></table>}</div><Status value={application.status} /></article>)}</section>}</>;
+}

@@ -1,14 +1,15 @@
+import { useEffect, useState } from 'react'
 import { Car, ClipboardList, Package, TrendingUp } from 'lucide-react'
 import { formatCurrencyPKR } from '../../utils/formatters'
-import { calculateEstimatedProfit, calculateLowStock } from '../../utils/calculations'
-import { getData, STORAGE_KEYS } from '../../services/localStorageService'
+import { getDashboardApi } from '../../services/businessApi'
 import { PageHeader, PanelTitle, StatCard, Status } from '../../components/common/Ui'
 
-const records = (key) => getData(key) || []
-
 export default function Dashboard() {
-  const cars = records(STORAGE_KEYS.cars)
-  const applications = records(STORAGE_KEYS.applications)
-  const lowStock = calculateLowStock(cars)
-  return <><PageHeader title="Command center" text="A live view of showroom performance and demand." /><div className="stats"><StatCard label="Total vehicles" value={cars.length} Icon={Car} /><StatCard label="Available stock" value={cars.filter(car => car.status === 'Available').length} Icon={Package} /><StatCard label="Pending applications" value={applications.filter(app => app.status === 'Pending').length} Icon={ClipboardList} /><StatCard label="Estimated profit" value={formatCurrencyPKR(calculateEstimatedProfit(cars))} Icon={TrendingUp} /></div><div className="two-col"><section className="panel"><PanelTitle title="Inventory pulse" /><div className="bars">{['Available', 'Reserved', 'Sold', 'Inactive'].map(status => <div className="bar" key={status}><span>{status}</span><i style={{ width: `${Math.max(8, cars.filter(car => car.status === status).length / cars.length * 100)}%` }} /><b>{cars.filter(car => car.status === status).length}</b></div>)}</div></section><section className="panel"><PanelTitle title="Low stock watchlist" />{lowStock.map(car => <div className="list" key={car.id}><b>{car.make} {car.model}</b><span>{car.stock} units · <Status value={car.status} /></span></div>)}</section></div></>
+  const [dashboard, setDashboard] = useState(null)
+  const [error, setError] = useState('')
+  useEffect(() => { let active = true; getDashboardApi().then(data => active && setDashboard(data)).catch(requestError => active && setError(requestError.response?.data?.message || 'Unable to load dashboard.')); return () => { active = false } }, [])
+  if (error) return <><PageHeader title="Command center" text="Live showroom performance and demand." /><div className="error" role="alert">{error}</div></>
+  if (!dashboard) return <section className="panel empty"><p>Loading dashboard...</p></section>
+  const applications = dashboard.applications || {}
+  return <><PageHeader title="Command center" text="Live showroom performance and demand." /><div className="stats"><StatCard label="Total vehicles" value={dashboard.totalVehicles} Icon={Car} /><StatCard label="Available stock" value={dashboard.availableVehicles} Icon={Package} /><StatCard label="Pending applications" value={applications.PENDING || 0} Icon={ClipboardList} /><StatCard label="Revenue collected" value={formatCurrencyPKR(dashboard.totalRevenue)} Icon={TrendingUp} /></div><div className="two-col"><section className="panel"><PanelTitle title="Application pulse" /><div className="bars">{['PENDING', 'APPROVED', 'ASSIGNED', 'COMPLETED', 'REJECTED'].map(status => <div className="bar" key={status}><span>{status}</span><i style={{ width: `${Math.max(8, Math.min(100, (applications[status] || 0) * 20))}%` }} /><b>{applications[status] || 0}</b></div>)}</div></section><section className="panel"><PanelTitle title="Financial position" /><div className="specs"><span>Customers<b>{dashboard.totalCustomers}</b></span><span>Outstanding<b>{formatCurrencyPKR(dashboard.outstandingBalance)}</b></span><span>Overdue installments<b>{dashboard.overdueInstallments}</b></span><span>Sold vehicles<b>{dashboard.soldVehicles}</b></span></div><Status value="Live" /></section></div></>
 }

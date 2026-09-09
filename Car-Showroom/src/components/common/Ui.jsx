@@ -5,7 +5,8 @@ export function PageHeader({ title, text, action }) {
 }
 
 export function Status({ value }) {
-  return <span className={`status ${value.toLowerCase()}`}>{value}</span>
+  const status = value || 'Unknown'
+  return <span className={`status ${status.toLowerCase()}`}>{status}</span>
 }
 
 export function PanelTitle({ title, action = 'Live' }) {
