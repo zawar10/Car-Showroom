@@ -1,3 +1,83 @@
-Car-Showroom/.env
-Car-Showroom/node_modules/
-Car-Showroom/dist/
+# Dependencies and package-manager output
+**/node_modules/
+**/.pnp/
+**/.pnp.js
+**/.yarn/
+**/.yarnrc
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/lerna-debug.log*
+
+# Environment files and local configuration
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.sample
+**/.npmrc
+**/*.local
+
+# Secrets, credentials, certificates, and private keys
+**/*secret*
+**/*secrets*
+**/*credential*
+**/*credentials*
+**/*.pem
+**/*.key
+**/*.crt
+**/*.cer
+**/*.p12
+**/*.pfx
+**/*.jks
+**/service-account*.json
+**/*-credentials.json
+
+# Local databases and database exports
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/*.dump
+**/*.backup
+**/*.bak
+**/*.sql.gz
+
+# Build, test, coverage, and generated output
+**/dist/
+**/dist-ssr/
+**/build/
+**/coverage/
+**/.vite/
+**/.cache/
+**/tmp/
+**/temp/
+**/uploads/
+**/storage/
+
+# Logs and runtime files
+**/logs/
+**/*.log
+**/*.pid
+**/*.pid.lock
+
+# Editor and operating-system files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.fleet/
+.DS_Store
+Thumbs.db
+*.suo
+*.user
+*.userosscache
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Test and local tool artifacts
+**/.nyc_output/
+**/.eslintcache
+**/.stylelintcache
+**/.turbo/
+**/.vercel/
